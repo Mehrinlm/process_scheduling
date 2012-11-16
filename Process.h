@@ -10,10 +10,60 @@ class Process {
    int priority;
    int deadline;
    int io;
+   int burstRemaining;
    
   public:
    int create(string info);
    string toString();
+   int getP_ID();
+   int getPriority();
+   int getArrival();
+   int getBurstRemaining();
+   void setBurstRemaining(int burstReamin);
+};
+
+int Process::getBurstRemaining(){
+  return burstRemaining;
+}
+
+void Process::setBurstRemaining(int burstRemain){
+  burstRemaining = burstRemain;
+}
+
+int Process::getArrival(){
+  return arrival;
+}
+
+int Process::getP_ID(){
+  return P_ID;
+}
+
+int Process::getPriority(){
+  return priority;
+}
+
+//compare by priority -- P_ID is tie breaker
+struct priority_cmp
+    : public binary_function<Process, Process, bool> {  
+        bool operator()(Process* left, Process* right) const{
+            int i = (*left).getPriority() - (*right).getPriority();
+            if (i == 0){
+              i = (*left).getP_ID() - (*right).getP_ID();
+            }
+            return i > 0;
+        }
+};
+
+//Compare by time, that way we can pop them as they arrive
+struct arrive_cmp
+    : public binary_function<Process, Process, bool> {  
+        bool operator()(Process* left, Process* right) const{
+            int i = (*left).getArrival() - (*right).getArrival();
+            if (i == 0){
+              i = (*left).getP_ID() - (*right).getP_ID();
+            }
+            return i > 0;
+        }
 };
 
 int Process::create(string info){
@@ -39,6 +89,7 @@ int Process::create(string info){
   priority = varaibles[3];
   deadline = varaibles[4];
   io = varaibles[5];
+  burstRemaining = burst;
 
   return 1;
 }
