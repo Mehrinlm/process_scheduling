@@ -1,5 +1,5 @@
-compile: read_in_proccess.cc
-	g++ read_in_proccess.cc -o read_in
-  
+compile: scheduler.cc
+	g++ scheduler.cc -o scheduler
+
 clean:
-	rm read_in
+	rm scheduler

@@ -1,4 +1,5 @@
 #include <sstream>
+
 #ifndef PROCESS
 #define PROCESS
 
@@ -45,7 +46,6 @@ int Process::create(string info){
 
 string Process::toString(){
   ostringstream convert;
-
 
   convert << "Process: ";
   convert << "\n\t P_ID: ";
