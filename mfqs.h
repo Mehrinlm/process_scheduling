@@ -1,14 +1,15 @@
 #include <iostream>
 #include "rr_queue.h"
 #include "fcfs_queue.h"
+#include "gantt.h"
 
 #ifndef MFQS
 #define MFQS
 
-using namespace std;
 class Mfqs {
     vector<RR_Queue> rr_queues;
     priority_queue<Process*, vector<Process*>, arrive_cmp>* fcfs_queue;
+    GanttChart gantt_chart;
     int aging_time;
     int current_queue;
 
@@ -34,6 +35,7 @@ class Mfqs {
     double getAverageWaitingTime();
     int getProcessesScheduled();
     int currentQueueRR();
+    GanttChart getGanttChart();
 };
 
 Mfqs::Mfqs(int num_queues, int time_quantum, int aging_time, priority_queue<Process*, vector<Process*>, arrive_cmp>* arrival_queue) {
@@ -48,16 +50,21 @@ Mfqs::Mfqs(int num_queues, int time_quantum, int aging_time, priority_queue<Proc
   // create fcfs_queue
   fcfs_queue = new priority_queue<Process*, vector<Process*>, arrive_cmp>;
 
-  cout << "Constructing MFQS\n";
   for (int i = 0; i < num_queues - 1; i++) {
     rr_queues.push_back(RR_Queue(time_quantum));
     time_quantum *= 2;
   }
   
-  cout << "\n\nRR_Queues Created:\n";
-  for (int i = 1; i < rr_queues.size() + 1; i++) {
-    cout << "Queue #" << i <<  "\tQuantum: " << rr_queues[i - 1].getTime_quantum() << "\n";
+  if (DEBUG) {
+    cout << "\n\nRR_Queues Created:\n";
+    for (int i = 1; i < rr_queues.size() + 1; i++) {
+      cout << "Queue #" << i <<  "\tQuantum: " << rr_queues[i - 1].getTime_quantum() << "\n";
+    }
   }
+}
+
+GanttChart Mfqs::getGanttChart() {
+  return this->gantt_chart;
 }
 
 vector<RR_Queue> Mfqs::getRR_queues() {
@@ -217,6 +224,9 @@ int executeMFQS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* ar
       // if no running process, select next process
       if (!process_set) {
         process = mfqs.getNextProcess();
+        if (process != 0) {
+          mfqs.getGanttChart().start((*process).getP_ID(), system_clock);
+        }
         process_set = 1;
       }
 
@@ -245,15 +255,21 @@ int executeMFQS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* ar
         mfqs.addWaitingTime(system_clock - (*process).getBurst() - (*process).getArrival());
         mfqs.addTurnaroundTime(system_clock - (*process).getArrival());
       }
+      mfqs.getGanttChart().end(system_clock);
     }
   }
 
+  // print statistics
   cout << "\n----------------------------\nSimulation Statistics:\n----------------------------\n";
   printf("Total Processes Scheduled: %d\n", mfqs.getProcessesScheduled());
   printf("Average Waiting Time: %.2f\n", mfqs.getAverageWaitingTime());
   printf("Average Turnaround Time: %.2f\n", mfqs.getAverageTurnaroundTime());
 
+  // print gantt chart
+  mfqs.getGanttChart().print();
+
   if (DEBUG) cout << "\n----------------------------\nSimulation End\n----------------------------\n";
 }
 
 #endif
+
