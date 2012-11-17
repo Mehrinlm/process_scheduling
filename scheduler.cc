@@ -1,22 +1,19 @@
+using namespace std;
+#define DEBUG 1
+
 #include <iostream>
 #include <string>
 #include <vector>
-#include "read_in_processes.cc"
 #include "io_utils.h"
+#include "queue_utils.h"
 #include "mfqs.h"
-
-using namespace std;
-
-// global process list
-vector<Process> processes;
-
+#include "rts.h"
 
 
 // -------------- START UNIMPLEMENTED FUNC STUBS -------------- //
 
 // execute scheduler funcs
 int executeMFQS();
-int executeRTS(){cout << "RTS exec";};
 int executeHybrid(){cout << "Hybrid exec";};
 
 // process funcs
@@ -26,10 +23,9 @@ void addProcess(){cout << "Add Process";};
 
 
 
-void printAllProcesses();
-
-
 int main (int argc, char * arv[]) {
+  // Create process arrical queue
+  std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arrival_queue = new std::priority_queue<Process*, vector<Process*>, arrive_cmp >();
 
   cout << "\nProcess Schedule Simulation\n----------------------------\n";
 
@@ -53,12 +49,12 @@ int main (int argc, char * arv[]) {
 
       case 2: { // add processes from file
         string fileName = getUserString("Enter filename:");
-        processes = readInProcess(fileName.c_str());
+        readProcessesFromFile(fileName.c_str(), arrival_queue);
         break;
       }
 
       case 3: { // view processes loaded
-        printAllProcesses();
+        printArrival(*arrival_queue);
         break;
       }
 
@@ -85,7 +81,7 @@ int main (int argc, char * arv[]) {
   if (scheduler == 1) {
     executeMFQS();
   } else if (scheduler == 2) {
-    executeRTS();
+    executeRTS(arrival_queue);
   } else if (scheduler == 3) {
     executeHybrid();
   }
@@ -93,18 +89,3 @@ int main (int argc, char * arv[]) {
   return 0;
 }
 
-void printAllProcesses(){
-  for (int i = 0; i < processes.size(); i++) {
-    cout << processes[i].toString() << endl;
-  }
-}
-
-int executeMFQS() {
-  cout << "\nMulti-level Feedback Queue\n----------------------------\n";
-
-  int num_queues = getUserInt("Enter the number of queues (1-5)", 1, 5);
-  int time_quantum = getUserInt("Enter the top queue's time quantum", 1, INT_MAX);
-  int aging_time = getUserInt("Enter the aging time", 1, INT_MAX);
-
-  Mfqs mfqs (num_queues, time_quantum, aging_time);
-}

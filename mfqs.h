@@ -38,4 +38,14 @@ FCFS_Queue Mfqs::getFCFS_queue() {
   return this->fcfs_queue;
 }
 
+int executeMFQS() {
+  cout << "\nMulti-level Feedback Queue\n----------------------------\n";
+
+  int num_queues = getUserInt("Enter the number of queues (1-5)", 1, 5);
+  int time_quantum = getUserInt("Enter the top queue's time quantum", 1, INT_MAX);
+  int aging_time = getUserInt("Enter the aging time", 1, INT_MAX);
+
+  Mfqs mfqs (num_queues, time_quantum, aging_time);
+}
+
 #endif
