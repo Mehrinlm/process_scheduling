@@ -13,7 +13,6 @@ using namespace std;
 // -------------- START UNIMPLEMENTED FUNC STUBS -------------- //
 
 // execute scheduler funcs
-int executeMFQS();
 int executeHybrid(){cout << "Hybrid exec";};
 
 // process funcs
@@ -79,7 +78,7 @@ int main (int argc, char * arv[]) {
   int scheduler = getUserChoice("Choose a scheduler:", schedulers);
 
   if (scheduler == 1) {
-    executeMFQS();
+    executeMFQS(arrival_queue);
   } else if (scheduler == 2) {
     executeRTS(arrival_queue);
   } else if (scheduler == 3) {

@@ -19,6 +19,7 @@ class Process {
    int getP_ID();
    int getPriority();
    int getArrival();
+   int getBurst();
    int getBurstRemaining();
    void setBurstRemaining(int burstReamin);
 };
@@ -32,6 +33,10 @@ void Process::setBurstRemaining(int burstRemain){
 }
 
 int Process::getArrival(){
+  return arrival;
+}
+
+int Process::getBurst(){
   return arrival;
 }
 

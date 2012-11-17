@@ -33,12 +33,12 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
   //Increases clock until all processes are done and both queueues empty
   while((*arrivalQueue).empty() == false || (*priorityQueue).empty() == false){
     
-    checkForArrivals(arrivalQueue, priorityQueue);
+    checkForArrivals(arrivalQueue, priorityQueue, system_clock);
     //Schedule!!!
     while ((*priorityQueue).empty() == false){
-      Process* p = (*priorityQueue).top();   //Get top of que
-      int burst = (*p).getBurstRemaining(); //Check remainint burst
-      (*p).setBurstRemaining(--burst);  //reduce burst by 1
+      Process* p = (*priorityQueue).top();                  //Get top of queue
+      int burst = (*p).getBurstRemaining();                 //Check remainint burst
+      (*p).setBurstRemaining(--burst);                      //reduce burst by 1
       if (DEBUG) cout << "clock: " << system_clock << "\tsize: " << (*priorityQueue).size() << "\ttimeLeft: " << burst << endl;
       if (burst < 0){
         //If that process is done, remove it from queue and free
