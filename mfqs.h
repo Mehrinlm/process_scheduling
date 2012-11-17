@@ -1,6 +1,5 @@
 #include <iostream>
 #include "rr_queue.h"
-#include "fcfs_queue.h"
 #include "gantt.h"
 
 #ifndef MFQS
