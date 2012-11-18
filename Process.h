@@ -9,22 +9,28 @@ class Process {
    int burst;
    int arrival;
    int priority;
+   int dynamic_priority;    // used in hybrid priority queue
    int deadline;
    int io;
    int burstRemaining;
-   int queue_arrival;       // used in mfqs fcfs queue
+   int queue_arrival;       // used in mfqs queues
+   int io_finish;           // used in hybrid io queue
    
   public:
    int create(string info);
    string toString();
    int getP_ID();
    int getPriority();
+   int getDynamicPriority();
+   void setDynamicPriority(int);
    int getArrival();
    int getQueueArrival();
    void setQueueArrival(int);
    int getBurst();
    int getBurstRemaining();
-   void setBurstRemaining(int burstRemain);
+   void setBurstRemaining(int);
+   int getIoFinish();
+   void setIoFinish(int);
 };
 
 int Process::getBurstRemaining(){
@@ -59,11 +65,51 @@ int Process::getPriority(){
   return priority;
 }
 
+int Process::getDynamicPriority(){
+  return dynamic_priority;
+}
+
+void Process::setDynamicPriority(int dynamic_priority){
+  this->dynamic_priority = dynamic_priority;
+}
+
+int Process::getIoFinish(){
+  return this->io_finish;
+}
+
+void Process::setIoFinish(int io_finish) {
+  this->io_finish = io_finish;
+}
+
 //compare by priority -- P_ID is tie breaker
 struct priority_cmp
     : public binary_function<Process, Process, bool> {  
         bool operator()(Process* left, Process* right) const{
             int i = (*left).getPriority() - (*right).getPriority();
+            if (i == 0){
+              i = (*left).getP_ID() - (*right).getP_ID();
+            }
+            return i > 0;
+        }
+};
+
+//compare by dynamic_priority -- P_ID is tie breaker (used by hybrid scheduler main priority queue)
+struct dynamic_priority_cmp
+    : public binary_function<Process, Process, bool> {  
+        bool operator()(Process* left, Process* right) const{
+            int i = (*left).getDynamicPriority() - (*right).getDynamicPriority();
+            if (i == 0){
+              i = (*left).getP_ID() - (*right).getP_ID();
+            }
+            return i > 0;
+        }
+};
+
+//compare by io finish_time -- P_ID is tie breaker (used by hybrid scheduler io queue)
+struct io_finish_cmp
+    : public binary_function<Process, Process, bool> {  
+        bool operator()(Process* left, Process* right) const{
+            int i = (*left).getIoFinish() - (*right).getIoFinish();
             if (i == 0){
               i = (*left).getP_ID() - (*right).getP_ID();
             }
@@ -83,7 +129,7 @@ struct arrive_cmp
         }
 };
 
-//Compare by queue arrival time
+//Compare by queue arrival time (used by all mfqs queues)
 struct queue_arrive_cmp
     : public binary_function<Process, Process, bool> {  
         bool operator()(Process* left, Process* right) const{

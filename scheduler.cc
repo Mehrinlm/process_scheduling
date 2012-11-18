@@ -7,13 +7,11 @@ using namespace std;
 #include "io_utils.h"
 #include "queue_utils.h"
 #include "mfqs.h"
+#include "hybrid.h"
 #include "rts.h"
 
 
 // -------------- START UNIMPLEMENTED FUNC STUBS -------------- //
-
-// execute scheduler funcs
-int executeHybrid(){cout << "Hybrid exec";};
 
 // process funcs
 void addProcess(){cout << "Add Process";};
@@ -82,7 +80,7 @@ int main (int argc, char * arv[]) {
   } else if (scheduler == 2) {
     executeRTS(arrival_queue);
   } else if (scheduler == 3) {
-    executeHybrid();
+    executeHybrid(arrival_queue);
   }
 
   return 0;
