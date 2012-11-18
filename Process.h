@@ -20,6 +20,7 @@ class Process {
   public:
    int create(string info);
    string toString();
+   string toStringCondensed();
    int getP_ID();
    int getIo();
    int getPriority();
@@ -113,7 +114,7 @@ struct priority_cmp
 struct dynamic_priority_cmp
     : public binary_function<Process, Process, bool> {  
         bool operator()(Process* left, Process* right) const{
-            int i = (*left).getDynamicPriority() - (*right).getDynamicPriority();
+            int i = (*right).getDynamicPriority() - (*left).getDynamicPriority();
             if (i == 0){
               i = (*left).getP_ID() - (*right).getP_ID();
             }
@@ -137,7 +138,7 @@ struct io_finish_cmp
 struct last_cpu_time_cmp
     : public binary_function<Process, Process, bool> {  
         bool operator()(Process* left, Process* right) const{
-            int i = (*left).getLastCpuTime() - (*right).getLastCpuTime();
+            int i = (*right).getLastCpuTime() - (*left).getLastCpuTime();
             if (i == 0){
               i = (*left).getP_ID() - (*right).getP_ID();
             }
@@ -190,6 +191,7 @@ int Process::create(string info){
   burst = varaibles[1];
   arrival = varaibles[2];
   priority = varaibles[3];
+  dynamic_priority = varaibles[3];
   deadline = varaibles[4];
   io = varaibles[5];
   burstRemaining = burst;
@@ -218,6 +220,36 @@ string Process::toString(){
   
   convert << "\n\t io: ";
   convert << io;
+
+  return convert.str();
+}
+
+string Process::toStringCondensed(){
+  ostringstream convert;
+
+  convert << "P_ID: ";
+  convert << P_ID;
+  
+  convert << "\t burst left: ";
+  convert << burstRemaining;
+  
+  convert << "\t arrival: ";
+  convert << arrival;
+  
+  convert << "\t priority:";
+  convert << priority;
+
+  convert << "\t dy pri:";
+  convert << dynamic_priority;
+
+  convert << "\t io: ";
+  convert << io;
+
+  convert << "\t last cpu: ";
+  convert << last_cpu_time;
+
+  convert << "\t io finish: ";
+  convert << io_finish;
 
   return convert.str();
 }

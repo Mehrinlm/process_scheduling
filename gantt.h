@@ -25,7 +25,7 @@ GanttChart::GanttChart(){
 
 void GanttChart::start(int p_id, int system_clock) {
   // only add new gantt_item if it has a different p_id
-  if ((*gantt_items).empty() || (*gantt_items)[(*gantt_items).size() - 1]->p_id != p_id) {
+  if ((*gantt_items).empty() || ((*gantt_items)[(*gantt_items).size() - 1]->p_id != p_id || (*gantt_items)[(*gantt_items).size() - 1]->end != system_clock)) {
     struct gantt_item *next_gantt = (struct gantt_item *) malloc(sizeof(struct gantt_item));
     next_gantt->p_id = p_id;
     next_gantt->start = system_clock;
