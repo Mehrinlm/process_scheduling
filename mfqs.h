@@ -7,7 +7,7 @@
 
 class Mfqs {
     vector<RR_Queue> rr_queues;
-    priority_queue<Process*, vector<Process*>, arrive_cmp>* fcfs_queue;
+    priority_queue<Process*, vector<Process*>, queue_arrive_cmp>* fcfs_queue;
     GanttChart gantt_chart;
     int aging_time;
     int current_queue;
@@ -19,14 +19,14 @@ class Mfqs {
   public:
     Mfqs(int, int, int, priority_queue<Process*, vector<Process*>, arrive_cmp>*);
     vector<RR_Queue> getRR_queues();
-    priority_queue<Process*, vector<Process*>, arrive_cmp>* getFCFS_queue();
-    priority_queue<Process*, vector<Process*>, arrive_cmp>* getQueue(int);
+    priority_queue<Process*, vector<Process*>, queue_arrive_cmp>* getFCFS_queue();
+    priority_queue<Process*, vector<Process*>, queue_arrive_cmp>* getQueue(int);
     int aboveQueuesEmpty();
     int allQueuesEmpty();
     int getCurrentQueueTimeQuantum();
     int getCurrentQueue();
     Process* getNextProcess();
-    void demote(Process*);
+    void demote(Process*, int);
     void addWaitingTime(int);
     void addTurnaroundTime(int);
     void incrementProcessesScheduled();
@@ -35,6 +35,7 @@ class Mfqs {
     int getProcessesScheduled();
     int currentQueueRR();
     GanttChart getGanttChart();
+    void promoteStarvedProcesses(int system_clock);
 };
 
 Mfqs::Mfqs(int num_queues, int time_quantum, int aging_time, priority_queue<Process*, vector<Process*>, arrive_cmp>* arrival_queue) {
@@ -47,7 +48,7 @@ Mfqs::Mfqs(int num_queues, int time_quantum, int aging_time, priority_queue<Proc
   this->aging_time = aging_time;
 
   // create fcfs_queue
-  fcfs_queue = new priority_queue<Process*, vector<Process*>, arrive_cmp>;
+  fcfs_queue = new priority_queue<Process*, vector<Process*>, queue_arrive_cmp>;
 
   for (int i = 0; i < num_queues - 1; i++) {
     rr_queues.push_back(RR_Queue(time_quantum));
@@ -70,11 +71,11 @@ vector<RR_Queue> Mfqs::getRR_queues() {
   return this->rr_queues;
 }
 
-priority_queue<Process*, vector<Process*>, arrive_cmp>* Mfqs::getFCFS_queue() {
+priority_queue<Process*, vector<Process*>, queue_arrive_cmp>* Mfqs::getFCFS_queue() {
   return this->fcfs_queue;
 }
 
-priority_queue<Process*, vector<Process*>, arrive_cmp>* Mfqs::getQueue(int i) {
+priority_queue<Process*, vector<Process*>, queue_arrive_cmp>* Mfqs::getQueue(int i) {
   if (i < rr_queues.size()) {
     return rr_queues[i].getQueue();
   }
@@ -164,11 +165,29 @@ int Mfqs::allQueuesEmpty() {
   return all_empty;
 }
 
-void Mfqs::demote(Process *process) {
+void Mfqs::demote(Process *process, int system_clock) {
   if (this->current_queue < rr_queues.size() - 1) {
+    (*process).setQueueArrival(system_clock);
     (*(rr_queues[this->current_queue + 1].getQueue())).push(process);
   } else {
+    (*process).setQueueArrival(system_clock);
     (*fcfs_queue).push(process);
+  }
+}
+
+void Mfqs::promoteStarvedProcesses(int system_clock) {
+  //printf("PROMOTE STARVED\t");
+  if ((*fcfs_queue).empty() == false){
+    //printf("FCFS NONEMPTY\t");
+    //printf("aging_time: %d\t", aging_time);
+    //printf("top process queue arrival: %d\n", (*((*fcfs_queue).top())).getQueueArrival());
+    while((*fcfs_queue).empty() == false && (*((*fcfs_queue).top())).getQueueArrival() + aging_time == system_clock){
+      if (DEBUG) printf("----------->PROMOTING PROCESS %d\tarrived: %d\t systime: %d<-------------\n", (*((*fcfs_queue).top())).getP_ID(), (*((*fcfs_queue).top())).getQueueArrival(), system_clock);
+      Process *process = (*fcfs_queue).top();
+      (*fcfs_queue).pop();
+      (*process).setQueueArrival(system_clock);
+      (*(rr_queues[rr_queues.size() - 1]).getQueue()).push(process);
+    }
   }
 }
 
@@ -220,6 +239,9 @@ int executeMFQS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* ar
       // retrieve incoming processes
       checkForArrivalsMFQS(arrival_queue, mfqs.getQueue(0), system_clock);
 
+      // check for process promotions from FCFS
+      mfqs.promoteStarvedProcesses(system_clock);
+
       // if no running process, select next process
       if (!process_set) {
         process = mfqs.getNextProcess();
@@ -232,6 +254,7 @@ int executeMFQS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* ar
       if (DEBUG) {
         printf("Sys_clock: %d\t", system_clock);
         if (process != 0) {
+          printf("Process ID: %d\t", (*process).getP_ID());
           printf("Remaining Burst: %d\t", (*process).getBurstRemaining());
           printf("Cpu Time:  %d\t", cpu_time);
           printf("Current Queue: %d\t", mfqs.getCurrentQueue());
@@ -248,7 +271,7 @@ int executeMFQS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* ar
 
     if (process != 0) {
       if ((*process).getBurstRemaining() > 0) {
-        mfqs.demote(process);
+        mfqs.demote(process, system_clock);
       } else {
         mfqs.incrementProcessesScheduled();
         mfqs.addWaitingTime(system_clock - (*process).getBurst() - (*process).getArrival());

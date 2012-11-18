@@ -61,10 +61,11 @@ void checkForArrivals(std::priority_queue<Process*, vector<Process*>, arrive_cmp
 }
 
 void checkForArrivalsMFQS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arrivalQueue,
-                        std::priority_queue<Process*, vector<Process*>, arrive_cmp >* priorityQueue,
+                        std::priority_queue<Process*, vector<Process*>, queue_arrive_cmp >* priorityQueue,
                         int system_clock){
   if ((*arrivalQueue).empty() == false){
     while((*arrivalQueue).empty() == false && (*((*arrivalQueue).top())).getArrival() == system_clock){
+      (*((*arrivalQueue).top())).setQueueArrival(system_clock);
       (*priorityQueue).push((*arrivalQueue).top());
       (*arrivalQueue).pop();
     }

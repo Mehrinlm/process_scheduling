@@ -12,6 +12,7 @@ class Process {
    int deadline;
    int io;
    int burstRemaining;
+   int queue_arrival;       // used in mfqs fcfs queue
    
   public:
    int create(string info);
@@ -19,9 +20,11 @@ class Process {
    int getP_ID();
    int getPriority();
    int getArrival();
+   int getQueueArrival();
+   void setQueueArrival(int);
    int getBurst();
    int getBurstRemaining();
-   void setBurstRemaining(int burstReamin);
+   void setBurstRemaining(int burstRemain);
 };
 
 int Process::getBurstRemaining(){
@@ -34,6 +37,14 @@ void Process::setBurstRemaining(int burstRemain){
 
 int Process::getArrival(){
   return arrival;
+}
+
+int Process::getQueueArrival(){
+  return queue_arrival;
+}
+
+void Process::setQueueArrival(int system_clock){
+  this->queue_arrival = system_clock;
 }
 
 int Process::getBurst(){
@@ -65,6 +76,18 @@ struct arrive_cmp
     : public binary_function<Process, Process, bool> {  
         bool operator()(Process* left, Process* right) const{
             int i = (*left).getArrival() - (*right).getArrival();
+            if (i == 0){
+              i = (*left).getP_ID() - (*right).getP_ID();
+            }
+            return i > 0;
+        }
+};
+
+//Compare by queue arrival time
+struct queue_arrive_cmp
+    : public binary_function<Process, Process, bool> {  
+        bool operator()(Process* left, Process* right) const{
+            int i = (*left).getQueueArrival() - (*right).getQueueArrival();
             if (i == 0){
               i = (*left).getP_ID() - (*right).getP_ID();
             }
