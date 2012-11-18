@@ -42,7 +42,9 @@ class HybridScheduler {
     // PROCESS ACCESS / MANAGMENT
     Process* getNextProcess();
     void demote(Process*, int);
-    void promoteStarvedProcesses(int system_clock);
+    void promoteStarvedProcesses(int);
+    void performIo(Process*, int);
+    void checkForIoComplete(int);
 };
 
 
@@ -167,8 +169,9 @@ Process* HybridScheduler::getNextProcess() {
   */
 }
 
-void HybridScheduler::demote(Process *process, int system_clock) {
+void HybridScheduler::demote(Process *process, int cpu_time) {
   printf("DEMOTE PROCESS");
+  (*process).setDynamicPriority((*process).getDynamicPriority() - cpu_time);
   /* OMG RANDOM STUFFS (MAYBE)
   if (this->current_queue < rr_queues.size() - 1) {
     (*process).setQueueArrival(system_clock);
@@ -195,6 +198,25 @@ void HybridScheduler::promoteStarvedProcesses(int system_clock) {
   */
 }
 
+void HybridScheduler::performIo(Process *process, int system_clock) {
+  printf("PERFORM IO");
+  (*process).setIoFinish(system_clock + (*process).getIo());
+  (*io_queue).push(process);
+}
+
+void HybridScheduler::checkForIoComplete(int system_clock) {
+  if ((*io_queue).empty() == false) {
+    while ((*io_queue).empty() == false && (*((*io_queue).top())).getIoFinish() == system_clock) {
+      // increase dynamic priority after io
+      Process *process = (*io_queue).top();
+      (*process).setDynamicPriority((*process).getDynamicPriority() + (*process).getIo());
+      
+      // add process back into ready queue
+      (*dynamic_priority_queue).push(process);
+      (*io_queue).pop();
+    }
+  }
+}
 
 /*****************************************************
  | Hybrid Scheduler - (Execution Path)               |
@@ -216,6 +238,66 @@ int executeHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* 
   HybridScheduler hybrid (time_quantum);
 
   if (DEBUG) cout << "\n----------------------------\nSimulation Start:\n----------------------------\n";
+
+  while ((*arrival_queue).empty() == false || hybrid.allQueuesEmpty() == false) {
+    cpu_time = 0;
+
+    // declare running process var
+    Process* process;
+    int process_set = 0;
+
+    while ((!process_set || (process != 0 && (*process).getBurstRemaining() > 0)) && cpu_time < hybrid.getTimeQuantum() - 1) {
+
+      // retrieve incoming processes
+      checkForArrivalsHybrid(arrival_queue, hybrid.getPriorityQueue(), system_clock);
+
+      // retrieve incoming processes
+      hybrid.checkForIoComplete(system_clock);
+
+      // check for process promotions every 100 clock ticks
+      if (system_clock % 100 == 0) {
+        hybrid.promoteStarvedProcesses(system_clock);
+      }
+
+      // if no running process, select next process
+      if (!process_set) {
+        process = hybrid.getNextProcess();
+        if (process != 0) {
+          hybrid.getGanttChart().start((*process).getP_ID(), system_clock);
+        }
+        process_set = 1;
+      }
+
+      if (DEBUG) {
+        printf("Sys_clock: %d\t", system_clock);
+        if (process != 0) {
+          printf("Process ID: %d\t", (*process).getP_ID());
+          printf("Remaining Burst: %d\t", (*process).getBurstRemaining());
+          printf("Cpu Time:  %d\t", cpu_time);
+        }
+        printf("\n");
+      }
+
+      // adjust process remaining_burst, cpu_time, and system_clock
+      if (process != 0) {
+        (*process).setBurstRemaining((*process).getBurstRemaining() - 1);
+      }
+      cpu_time++;
+      system_clock++;
+    }
+
+    if (process != 0) {
+      if ((*process).getBurstRemaining() > 0) {
+        hybrid.demote(process, cpu_time);
+        hybrid.performIo(process, system_clock);
+      } else {
+        hybrid.incrementProcessesScheduled();
+        hybrid.addWaitingTime(system_clock - (*process).getBurst() - (*process).getArrival());
+        hybrid.addTurnaroundTime(system_clock - (*process).getArrival());
+      }
+      hybrid.getGanttChart().end(system_clock);
+    }
+  }
 
   // print statistics
   cout << "\n----------------------------\nSimulation Statistics:\n----------------------------\n";

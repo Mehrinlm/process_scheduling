@@ -72,3 +72,14 @@ void checkForArrivalsMFQS(std::priority_queue<Process*, vector<Process*>, arrive
   }
 }
 
+void checkForArrivalsHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arrivalQueue,
+                        std::priority_queue<Process*, vector<Process*>, dynamic_priority_cmp >* priorityQueue,
+                        int system_clock){
+  if ((*arrivalQueue).empty() == false){
+    while((*arrivalQueue).empty() == false && (*((*arrivalQueue).top())).getArrival() == system_clock){
+      (*priorityQueue).push((*arrivalQueue).top());
+      (*arrivalQueue).pop();
+    }
+  }
+}
+

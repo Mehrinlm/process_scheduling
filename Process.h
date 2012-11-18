@@ -20,6 +20,7 @@ class Process {
    int create(string info);
    string toString();
    int getP_ID();
+   int getIo();
    int getPriority();
    int getDynamicPriority();
    void setDynamicPriority(int);
@@ -59,6 +60,10 @@ int Process::getBurst(){
 
 int Process::getP_ID(){
   return P_ID;
+}
+
+int Process::getIo(){
+  return io;
 }
 
 int Process::getPriority(){
