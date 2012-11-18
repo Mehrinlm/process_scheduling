@@ -17,6 +17,7 @@ class HybridScheduler {
     GanttChart gantt_chart;
     priority_queue<Process*, vector<Process*>, dynamic_priority_cmp>* dynamic_priority_queue;
     priority_queue<Process*, vector<Process*>, io_finish_cmp>* io_queue;
+    priority_queue<Process*, vector<Process*>, last_cpu_time_cmp>* starvation_queue;
    
   public:
     // CONSTRUCTORS
@@ -29,6 +30,7 @@ class HybridScheduler {
     double getAverageTurnaroundTime();
     priority_queue<Process*, vector<Process*>, dynamic_priority_cmp>* getPriorityQueue();
     priority_queue<Process*, vector<Process*>, io_finish_cmp>* getIoQueue();
+    priority_queue<Process*, vector<Process*>, last_cpu_time_cmp>* getStarvationQueue();
     GanttChart getGanttChart();
 
     // MUTATORS
@@ -63,6 +65,9 @@ HybridScheduler::HybridScheduler(int time_quantum) {
 
   // create priority queue
   dynamic_priority_queue = new priority_queue<Process*, vector<Process*>, dynamic_priority_cmp>;
+
+  // create starvation queue (queue of all processes ordered by longest non-cpu time)
+  starvation_queue = new priority_queue<Process*, vector<Process*>, last_cpu_time_cmp>;
 
   // create io queue
   io_queue = new priority_queue<Process*, vector<Process*>, io_finish_cmp>;
@@ -102,6 +107,10 @@ priority_queue<Process*, vector<Process*>, dynamic_priority_cmp>* HybridSchedule
 
 priority_queue<Process*, vector<Process*>, io_finish_cmp>* HybridScheduler::getIoQueue() {
   return this->io_queue;
+}
+
+priority_queue<Process*, vector<Process*>, last_cpu_time_cmp>* HybridScheduler::getStarvationQueue() {
+  return this->starvation_queue;
 }
 
 GanttChart HybridScheduler::getGanttChart() {
@@ -149,53 +158,38 @@ Process* HybridScheduler::getNextProcess() {
     return process;
   }
   return NULL;
-
-  /*
-  for (int i = 0; i < rr_queues.size(); i++) {
-    if ((*(rr_queues[i].getQueue())).size() > 0) {
-      Process* process = (*(rr_queues[i].getQueue())).top();
-      (*(rr_queues[i].getQueue())).pop();
-      this->current_queue = i;
-      return process;
-    }
-  }
-  if ((*fcfs_queue).size() > 0) {
-    Process* process = (*fcfs_queue).top();
-    (*fcfs_queue).pop();
-    this->current_queue = rr_queues.size();
-    return process;
-  }
-  return NULL;
-  */
 }
 
 void HybridScheduler::demote(Process *process, int cpu_time) {
   printf("DEMOTE PROCESS");
   (*process).setDynamicPriority((*process).getDynamicPriority() - cpu_time);
-  /* OMG RANDOM STUFFS (MAYBE)
-  if (this->current_queue < rr_queues.size() - 1) {
-    (*process).setQueueArrival(system_clock);
-    (*(rr_queues[this->current_queue + 1].getQueue())).push(process);
-  } else {
-    (*process).setQueueArrival(system_clock);
-    (*fcfs_queue).push(process);
+
+  // ensure process dynamic priority does not go below base priority
+  if ((*process).getDynamicPriority() < (*process).getPriority()) {
+    (*process).setDynamicPriority((*process).getPriority());
   }
-  */
 }
 
 void HybridScheduler::promoteStarvedProcesses(int system_clock) {
   printf("PROMOTE STARVED PROCESSES");
-  /* OMG RANDOM STUFFS (MAYBE)
-  if ((*fcfs_queue).empty() == false){
-    while((*fcfs_queue).empty() == false && (*((*fcfs_queue).top())).getQueueArrival() + aging_time == system_clock){
-      if (DEBUG) printf("----------->PROMOTING PROCESS %d\tarrived: %d\t systime: %d<-------------\n", (*((*fcfs_queue).top())).getP_ID(), (*((*fcfs_queue).top())).getQueueArrival(), system_clock);
-      Process *process = (*fcfs_queue).top();
-      (*fcfs_queue).pop();
-      (*process).setQueueArrival(system_clock);
-      (*(rr_queues[rr_queues.size() - 1]).getQueue()).push(process);
+
+  // vector to temporarily hold pop'd off starved processes
+  vector<Process*> starved_processes;
+
+  // update starved processes
+  if ((*starvation_queue).empty() == false) {
+    while ((*starvation_queue).empty() == false && (*((*starvation_queue).top())).getLastCpuTime() - system_clock > 100) {
+      Process *process = (*starvation_queue).top();
+      (*process).setDynamicPriority((*process).getDynamicPriority() + 10);
+      starved_processes.push_back(process);
+      (*starvation_queue).pop();
     }
   }
-  */
+
+  // return modified processes to starvation queue
+  for (int i = 0; i < starved_processes.size(); i++) {
+    (*starvation_queue).push(starved_processes[i]);
+  }
 }
 
 void HybridScheduler::performIo(Process *process, int system_clock) {
@@ -249,7 +243,7 @@ int executeHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* 
     while ((!process_set || (process != 0 && (*process).getBurstRemaining() > 0)) && cpu_time < hybrid.getTimeQuantum() - 1) {
 
       // retrieve incoming processes
-      checkForArrivalsHybrid(arrival_queue, hybrid.getPriorityQueue(), system_clock);
+      checkForArrivalsHybrid(arrival_queue, hybrid.getPriorityQueue(), hybrid.getStarvationQueue(), system_clock);
 
       // retrieve incoming processes
       hybrid.checkForIoComplete(system_clock);
@@ -288,8 +282,11 @@ int executeHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* 
 
     if (process != 0) {
       if ((*process).getBurstRemaining() > 0) {
-        hybrid.demote(process, cpu_time);
-        hybrid.performIo(process, system_clock);
+        if ((*process).getIo() > 0) {
+          hybrid.performIo(process, system_clock);
+        } else {
+          hybrid.demote(process, cpu_time);
+        }
       } else {
         hybrid.incrementProcessesScheduled();
         hybrid.addWaitingTime(system_clock - (*process).getBurst() - (*process).getArrival());
@@ -309,65 +306,6 @@ int executeHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* 
   hybrid.getGanttChart().print();
 
   if (DEBUG) cout << "\n----------------------------\nSimulation End\n----------------------------\n";
-
-  /*
-
-  while ((*arrival_queue).empty() == false || mfqs.allQueuesEmpty() == false) {
-    cpu_time = 0;
-
-    // declare running process var
-    Process* process;
-    int process_set = 0;
-
-    //while ((!process_set || (*process).getBurstRemaining() > 0) && cpu_time < mfqs.getCurrentQueueTimeQuantum()) {
-    while ((!process_set || (process != 0 && (*process).getBurstRemaining() > 0)) && ((mfqs.currentQueueRR() && cpu_time < mfqs.getCurrentQueueTimeQuantum()) || !mfqs.currentQueueRR())) {
-
-      // retrieve incoming processes
-      checkForArrivalsMFQS(arrival_queue, mfqs.getQueue(0), system_clock);
-
-      // check for process promotions from FCFS
-      mfqs.promoteStarvedProcesses(system_clock);
-
-      // if no running process, select next process
-      if (!process_set) {
-        process = mfqs.getNextProcess();
-        if (process != 0) {
-          mfqs.getGanttChart().start((*process).getP_ID(), system_clock);
-        }
-        process_set = 1;
-      }
-
-      if (DEBUG) {
-        printf("Sys_clock: %d\t", system_clock);
-        if (process != 0) {
-          printf("Process ID: %d\t", (*process).getP_ID());
-          printf("Remaining Burst: %d\t", (*process).getBurstRemaining());
-          printf("Cpu Time:  %d\t", cpu_time);
-          printf("Current Queue: %d\t", mfqs.getCurrentQueue());
-        }
-        printf("\n");
-      }
-
-      // adjust process remaining_burst, cpu_time, and system_clock
-      if (process != 0)
-        (*process).setBurstRemaining((*process).getBurstRemaining() - 1);
-      cpu_time++;
-      system_clock++;
-    }
-
-    if (process != 0) {
-      if ((*process).getBurstRemaining() > 0) {
-        mfqs.demote(process, system_clock);
-      } else {
-        mfqs.incrementProcessesScheduled();
-        mfqs.addWaitingTime(system_clock - (*process).getBurst() - (*process).getArrival());
-        mfqs.addTurnaroundTime(system_clock - (*process).getArrival());
-      }
-      mfqs.getGanttChart().end(system_clock);
-    }
-  }
-
-  */
 }
 
 #endif

@@ -15,6 +15,7 @@ class Process {
    int burstRemaining;
    int queue_arrival;       // used in mfqs queues
    int io_finish;           // used in hybrid io queue
+   int last_cpu_time;       // used in hybrid io queue
    
   public:
    int create(string info);
@@ -32,6 +33,8 @@ class Process {
    void setBurstRemaining(int);
    int getIoFinish();
    void setIoFinish(int);
+   int getLastCpuTime();
+   void setLastCpuTime(int);
 };
 
 int Process::getBurstRemaining(){
@@ -86,6 +89,14 @@ void Process::setIoFinish(int io_finish) {
   this->io_finish = io_finish;
 }
 
+int Process::getLastCpuTime(){
+  return this->last_cpu_time;
+}
+
+void Process::setLastCpuTime(int last_cpu_time) {
+  this->last_cpu_time = last_cpu_time;
+}
+
 //compare by priority -- P_ID is tie breaker
 struct priority_cmp
     : public binary_function<Process, Process, bool> {  
@@ -115,6 +126,18 @@ struct io_finish_cmp
     : public binary_function<Process, Process, bool> {  
         bool operator()(Process* left, Process* right) const{
             int i = (*left).getIoFinish() - (*right).getIoFinish();
+            if (i == 0){
+              i = (*left).getP_ID() - (*right).getP_ID();
+            }
+            return i > 0;
+        }
+};
+
+//compare by last cpu time -- P_ID is tie breaker (used by hybrid scheduler io queue)
+struct last_cpu_time_cmp
+    : public binary_function<Process, Process, bool> {  
+        bool operator()(Process* left, Process* right) const{
+            int i = (*left).getLastCpuTime() - (*right).getLastCpuTime();
             if (i == 0){
               i = (*left).getP_ID() - (*right).getP_ID();
             }
