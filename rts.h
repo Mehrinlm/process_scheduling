@@ -10,8 +10,8 @@ using namespace std;
 int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arrivalQueue, bool softMode) {
 
   int numOfProcess = 0;
-  int turnaround = 0;
-  int waitTime = 0;
+  unsigned long int turnaround = 0;
+  unsigned long int waitTime = 0;
   
 
   //Setup Gantt Chart
@@ -44,11 +44,12 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
         //add up stats info
         turnaround += (system_clock - (*p).getArrival());
         numOfProcess++;
-        waitTime += ((system_clock - (*p).getArrival()) - (*p).getBurst());
+        waitTime += ((system_clock - (*p).getArrival()) - ((*p).getBurst() - (*p).getBurstRemaining()));
         
         if (system_clock > (*p).getDeadline()) {
           if (softMode){
             (*gantt_chart).deadLineMissed();
+            system_clock--;
           } else {
             hardModeFailed = true;
           } 

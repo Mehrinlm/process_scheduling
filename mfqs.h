@@ -13,8 +13,8 @@ class Mfqs {
     int current_queue;
 
     int processes_scheduled;
-    int waiting_time;
-    int turnaround_time;
+    unsigned long int waiting_time;
+    unsigned long int turnaround_time;
    
   public:
     Mfqs(int, int, int, priority_queue<Process*, vector<Process*>, arrive_cmp>*);
@@ -304,14 +304,20 @@ int executeMFQS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* ar
     }
   }
 
-  // print statistics
-  cout << "\n----------------------------\nSimulation Statistics:\n----------------------------\n";
-  printf("Total Processes Scheduled: %d\n",(*mfqs).getProcessesScheduled());
-  printf("Average Waiting Time: %.2f\n", (*mfqs).getAverageWaitingTime());
-  printf("Average Turnaround Time: %.2f\n", (*mfqs).getAverageTurnaroundTime());
 
   // print gantt chart
   (*((*mfqs).getGanttChart())).print();
+  
+  // print statistics
+  cout << "\n----------------------------\nSimulation Statistics:\n----------------------------\n";
+ // cout.precision(2);
+  cout << "Total Processes Scheduled: " << (*mfqs).getProcessesScheduled() << endl;
+  cout << "Average Waiting Time: " << (*mfqs).getAverageWaitingTime() << endl;
+  cout << "Average Turnaround Time: " << (*mfqs).getAverageTurnaroundTime() << endl;
+  
+  // printf("Total Processes Scheduled: %d\n",(*mfqs).getProcessesScheduled());
+  // printf("Average Waiting Time: %.2f\n", (*mfqs).getAverageWaitingTime());
+  // printf("Average Turnaround Time: %.2f\n", (*mfqs).getAverageTurnaroundTime());
 
   if (DEBUG) cout << "\n----------------------------\nSimulation End\n----------------------------\n";
 

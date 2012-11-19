@@ -12,8 +12,8 @@
 class HybridScheduler {
     int time_quantum;
     int processes_scheduled;
-    int waiting_time;
-    int turnaround_time;
+    unsigned long int waiting_time;
+    unsigned long int turnaround_time;
     GanttChart *gantt_chart;
     priority_queue<Process*, vector<Process*>, dynamic_priority_cmp>* dynamic_priority_queue;
     priority_queue<Process*, vector<Process*>, io_finish_cmp>* io_queue;
@@ -204,8 +204,10 @@ void HybridScheduler::promoteStarvedProcesses(int system_clock) {
   make_heap((*starvation_queue).begin(), (*starvation_queue).end(), last_cpu_time_cmp());
   sort_heap((*starvation_queue).begin(), (*starvation_queue).end(), last_cpu_time_cmp());
 
-  cout << "\nPROMOTE STARVED\n";
-  printLastCpuTime((*starvation_queue));
+  if (DEBUG){
+    cout << "\nPROMOTE STARVED\n";
+    printLastCpuTime((*starvation_queue));
+  }
 
   // update starved processes
   if ((*starvation_queue).empty() == false) {
@@ -321,16 +323,18 @@ int executeHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* 
         process_set = 1;
       }
 
-      cout << "\n----------------------------\nArrival Queue:\n----------------------------\n";
-      printArrival(*arrival_queue);
-      cout << "\n----------------------------\nDynamic Pri Queue:\n----------------------------\n";
-      printDynamicPriority(*((*hybrid).getPriorityQueue()));
-      cout << "\n----------------------------\nIo Queue:\n----------------------------\n";
-      printIoFinish(*((*hybrid).getIoQueue()));
-      cout << "\n----------------------------\nStarvation Queue:\n----------------------------\n";
-      printLastCpuTime(*((*hybrid).getStarvationQueue()));
-      cout << "\n----------------------------\nCPU:\tClock: " << system_clock << "\tCpu time: " << cpu_time << "\n----------------------------\n";
-      if (process != 0) cout << (*process).toStringCondensed();
+      if (DEBUG){
+        cout << "\n----------------------------\nArrival Queue:\n----------------------------\n";
+        printArrival(*arrival_queue);
+        cout << "\n----------------------------\nDynamic Pri Queue:\n----------------------------\n";
+        printDynamicPriority(*((*hybrid).getPriorityQueue()));
+        cout << "\n----------------------------\nIo Queue:\n----------------------------\n";
+        printIoFinish(*((*hybrid).getIoQueue()));
+        cout << "\n----------------------------\nStarvation Queue:\n----------------------------\n";
+        printLastCpuTime(*((*hybrid).getStarvationQueue()));
+        cout << "\n----------------------------\nCPU:\tClock: " << system_clock << "\tCpu time: " << cpu_time << "\n----------------------------\n";
+        if (process != 0) cout << (*process).toStringCondensed();
+      }
 
       // adjust process remaining_burst, last_cpu_time, cpu_time, and system_clock
       if (process != 0) {
@@ -357,15 +361,15 @@ int executeHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* 
     }
   }
 
+  // print gantt chart
+  (*((*hybrid).getGanttChart())).print();
+
   // print statistics
   cout << "\n----------------------------\nSimulation Statistics:\n----------------------------\n";
   printf("Total Processes Scheduled: %d\n", (*hybrid).getProcessesScheduled());
   printf("Average Waiting Time: %.2f\n", (*hybrid).getAverageWaitingTime());
   printf("Average Turnaround Time: %.2f\n", (*hybrid).getAverageTurnaroundTime());
-
-  // print gantt chart
-  (*((*hybrid).getGanttChart())).print();
-
+  
   if (DEBUG) cout << "\n----------------------------\nSimulation End\n----------------------------\n";
 
   delete(arrival_queue);

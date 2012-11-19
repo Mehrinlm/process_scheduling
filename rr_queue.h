@@ -18,7 +18,6 @@ RR_Queue::RR_Queue(int time_quantum_in) {
   // initialize priority queue based on arrival
   queue = new priority_queue<Process*, vector<Process*>, queue_arrive_cmp>;
 
-  cout << "Constructing RR_Queue\n";
   time_quantum = time_quantum_in;
 }
 

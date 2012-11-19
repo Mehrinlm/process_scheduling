@@ -17,6 +17,8 @@ void readProcessesFromFile(const char* fileName, priority_queue<Process*, vector
       Process* process = new Process();     //Create Process
       if ((*process).create(line)){             //calls this method to parse out input tring
         (*queue).push(process);               //Adds process to priority_que
+      } else {
+        delete(process);
       }
     }
     in.close();

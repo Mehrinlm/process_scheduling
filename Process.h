@@ -215,7 +215,10 @@ int Process::create(string info){
   io = boxInt(varaibles[5], 0, INT_MAX);
   io_finish = 0;
   last_cpu_time = 0;
-
+  
+  if (burst == 0)
+    return 0;
+  
   return 1;
 }
 
@@ -249,6 +252,7 @@ string Process::toStringCondensed(){
 
   convert << "P_ID: ";
   convert << P_ID;
+  convert << " ";
   
   convert << "\t burst left: ";
   convert << burstRemaining;
