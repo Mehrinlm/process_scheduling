@@ -15,7 +15,9 @@ for ($i = 0; $i < $numOfVals; $i++){
       $insert = $insert . int($random_number);
     }
   }
-$insert = $insert . "\n";
+  if ($i == $numOfVals-1){
+    $insert = $insert . "\n";
+  }
   
 }
 
