@@ -48,15 +48,12 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
         numOfProcess++;
         waitTime += ((system_clock - (*p).getArrival()) - (*p).getBurst());
         
-        
-        if (gantt != NULL && system_clock > (*p).getDeadline()) {
+        if (system_clock > (*p).getDeadline()) {
           if (softMode){
             gantt_chart.deadLineMissed();
           } else {
             hardModeFailed = true;
           } 
-        } else if (gantt == NULL){
-          printf("Gantt is null\n");
         }
           
         if (!hardModeFailed){
