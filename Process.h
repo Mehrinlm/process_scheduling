@@ -23,6 +23,7 @@ class Process {
    string toStringCondensed();
    int getP_ID();
    int getIo();
+   int getDeadline();
    int getPriority();
    int getDynamicPriority();
    void setDynamicPriority(int);
@@ -60,6 +61,10 @@ void Process::setQueueArrival(int system_clock){
 
 int Process::getBurst(){
   return arrival;
+}
+
+int Process::getDeadline(){
+  return deadline;
 }
 
 int Process::getP_ID(){
@@ -190,7 +195,10 @@ int Process::create(string info){
       string num = info.substr(start, i);
       start = i+1;
       istringstream convert(num);
-      convert >> varaibles[index++];
+      convert >> varaibles[index];
+      if (varaibles[index++] < 0){
+        return 0;
+      }
     }
   }
   string num = info.substr(start);
@@ -251,6 +259,9 @@ string Process::toStringCondensed(){
   convert << "\t priority:";
   convert << priority;
 
+  convert << "\t Deadline:";
+  convert << deadline;
+  
   convert << "\t dy pri:";
   convert << dynamic_priority;
 

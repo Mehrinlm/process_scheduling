@@ -1,5 +1,5 @@
 using namespace std;
-#define DEBUG 1
+#define DEBUG 0
 
 #include <iostream>
 #include <string>
@@ -78,7 +78,11 @@ int main (int argc, char * arv[]) {
   if (scheduler == 1) {
     executeMFQS(arrival_queue);
   } else if (scheduler == 2) {
-    executeRTS(arrival_queue);
+    vector<string> rts;
+    rts.push_back("Hard Mode");
+    rts.push_back("Soft Mode");
+    int rtsMode = getUserChoice("RTS Mode:", rts);
+    executeRTS(arrival_queue, rtsMode == 2);
   } else if (scheduler == 3) {
     executeHybrid(arrival_queue);
   }
