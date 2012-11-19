@@ -87,8 +87,8 @@ void free_queues(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* a
       free(p);
     }   
     
-    free(arrivalQueue);
-    free(priorityQueue);
+    delete(arrivalQueue);
+    delete(priorityQueue);
 }
 
 

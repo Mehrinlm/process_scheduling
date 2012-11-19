@@ -15,8 +15,7 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
   
 
   //Setup Gantt Chart
-  GanttChart gantt_chart;
-  gantt_item* gantt;
+  GanttChart* gantt_chart = new GanttChart();
 
   //Set system_clock to 0
   int system_clock = 0;
@@ -24,7 +23,6 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
   Process* p;
   bool hardModeFailed = false;
   
-  printArrival(*arrivalQueue);
 
   //Create queue (Priority)
   std::priority_queue<Process*, vector<Process*>, priority_cmp >* priorityQueue = new std::priority_queue<Process*, vector<Process*>, priority_cmp >;
@@ -36,7 +34,7 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
     //Schedule!!!
     while ((*priorityQueue).empty() == false && !hardModeFailed){
       p = (*priorityQueue).top();                  //Get top of queue
-      gantt_chart.start((*p).getP_ID(), system_clock);    //Set up gantt chart
+      (*gantt_chart).start((*p).getP_ID(), system_clock);    //Set up gantt chart
       int burst = (*p).getBurstRemaining();                 //Check remainint burst
       (*p).setBurstRemaining(--burst);                      //reduce burst by 1
       if (burst < 0 || system_clock > (*p).getDeadline()){
@@ -50,7 +48,7 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
         
         if (system_clock > (*p).getDeadline()) {
           if (softMode){
-            gantt_chart.deadLineMissed();
+            (*gantt_chart).deadLineMissed();
           } else {
             hardModeFailed = true;
           } 
@@ -65,7 +63,7 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
      
       //update clock and check for new arrivals
       system_clock++;
-      gantt_chart.end(system_clock);
+      (*gantt_chart).end(system_clock);
       checkForArrivals(arrivalQueue, priorityQueue, system_clock);
     }
 
@@ -74,10 +72,10 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
   if (hardModeFailed){
     cout << "Dealine not met on process P_ID: " << (*p).getP_ID() << " and in hard mode!" << endl;
   } else {
-    gantt_chart.print();
+    (*gantt_chart).print();
   }
   free_queues(arrivalQueue, priorityQueue);
- 
+  delete(gantt_chart);
   printf("Average Turnaround: %d\n", (turnaround/numOfProcess));
   printf("Average Wait: %d\n", (waitTime/numOfProcess));
   printf("# of processes ran: %d\n", numOfProcess);
