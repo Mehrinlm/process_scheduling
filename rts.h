@@ -76,9 +76,12 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
   }
   free_queues(arrivalQueue, priorityQueue);
   delete(gantt_chart);
-  printf("Average Turnaround: %d\n", (turnaround/numOfProcess));
-  printf("Average Wait: %d\n", (waitTime/numOfProcess));
-  printf("# of processes ran: %d\n", numOfProcess);
+  if (numOfProcess != 0){
+    printf("Average Turnaround: %d\n", (turnaround/numOfProcess));
+    printf("Average Wait: %d\n", (waitTime/numOfProcess));
+    printf("# of processes ran: %d\n", numOfProcess);
+  }
+
   
 }
 
