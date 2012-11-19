@@ -300,7 +300,7 @@ int executeHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* 
     int process_set = 0;
 
     // a process is not chosen or ((the process is valid with more burst to complete) and the process has io and cpu time is less than time quantum -1 or cputime less than time quantum)
-    while (!process_set || ((process != 0 && (*process).getBurstRemaining() > 0) && (((*process).getIo() > 0 && (cpu_time < (*hybrid).getTimeQuantum() - 1)) || (cpu_time < (*hybrid).getTimeQuantum())))) {
+    while (!process_set || ((process != 0 && (*process).getBurstRemaining() > 0) && (((*process).getIo() > 0 && (cpu_time < (*hybrid).getTimeQuantum() - 1)) || ((*process).getIo() == 0 && (cpu_time < (*hybrid).getTimeQuantum()))))) {
 
 
       // retrieve incoming processes
