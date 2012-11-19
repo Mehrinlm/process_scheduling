@@ -8,6 +8,7 @@ class RR_Queue {
    
   public:
     RR_Queue(int);
+    ~RR_Queue();
     int getTime_quantum();
     priority_queue<Process*, vector<Process*>, queue_arrive_cmp>* getQueue();
 };
@@ -19,6 +20,12 @@ RR_Queue::RR_Queue(int time_quantum_in) {
 
   cout << "Constructing RR_Queue\n";
   time_quantum = time_quantum_in;
+}
+
+RR_Queue::~RR_Queue() {
+
+  // delete queue
+  delete(queue);
 }
 
 int RR_Queue::getTime_quantum() {
