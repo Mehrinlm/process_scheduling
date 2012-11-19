@@ -1,7 +1,13 @@
 #include <iostream>
 #include <limits>
 #include <climits>
+#include <fstream>
+#include <cstdlib>
+#include <sstream>
+#include<ctime>
+#include "gantt.h"
 #include "Process.h"
+
 
 string getUserString(string message) {
 
@@ -92,4 +98,27 @@ int getUserInt(string message, int min, int max) {
 
   return value;
 }
+
+//Writes gantt chart data to file
+int writeToFile(const char* fileName, GanttChart* chart){
+  ofstream out;
+  
+  out.open(fileName);
+  
+  streambuf *psbuf, *backup;
+
+  backup = cout.rdbuf();     // back up cout's streambuf
+
+  psbuf = out.rdbuf();   // get file's streambuf
+  cout.rdbuf(psbuf);         // assign streambuf to cout
+  
+  (*chart).print();
+  
+  cout.rdbuf(backup);        // restore cout's original streambuf
+
+  out.close();
+}
+  
+  
+  
 

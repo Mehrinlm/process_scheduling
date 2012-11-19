@@ -307,7 +307,7 @@ int executeMFQS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* ar
 
   // print gantt chart
   (*((*mfqs).getGanttChart())).print();
-  
+  writeToFile("mfqs_output.txt", ((*mfqs).getGanttChart())); 
   // print statistics
   cout << "\n----------------------------\nSimulation Statistics:\n----------------------------\n";
  // cout.precision(2);

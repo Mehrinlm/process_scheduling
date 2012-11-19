@@ -318,7 +318,7 @@ int executeHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* 
       if (!process_set) {
         process = (*hybrid).getNextProcess();
         if (process != 0) {
-          (*((*hybrid).getGanttChart())).start((*process).getP_ID(), system_clock);
+          (*((*hybrid).getGanttChart())).start((*process).getP_ID(), system_clock, (*process).getUniqueID());
         }
         process_set = 1;
       }
@@ -363,6 +363,7 @@ int executeHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* 
 
   // print gantt chart
   (*((*hybrid).getGanttChart())).print();
+  writeToFile("mfqs_output.txt", ((*hybrid).getGanttChart())); 
 
   // print statistics
   cout << "\n----------------------------\nSimulation Statistics:\n----------------------------\n";

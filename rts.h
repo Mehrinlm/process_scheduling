@@ -57,7 +57,7 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
           (*priorityQueue).pop();
           free(p);
         }
-system_clock--;
+        system_clock--;
       }
      
       //update clock and check for new arrivals
@@ -72,6 +72,7 @@ system_clock--;
     cout << "Dealine not met on process P_ID: " << (*p).getP_ID() << " and in hard mode!" << endl;
   } else {
     (*gantt_chart).print();
+    writeToFile("rts_output.txt", gantt_chart); 
   }
   free_queues(arrivalQueue, priorityQueue);
   delete(gantt_chart);
