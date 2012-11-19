@@ -119,6 +119,26 @@ int writeToFile(const char* fileName, GanttChart* chart){
   out.close();
 }
   
+//Writes gantt chart data to file
+int writeToFile(const char* fileName, const char *text){
+  ofstream out;
+  
+  out.open(fileName, ios::app);
+  
+  streambuf *psbuf, *backup;
+
+  backup = cout.rdbuf();     // back up cout's streambuf
+
+  psbuf = out.rdbuf();       // get file's streambuf
+  cout.rdbuf(psbuf);         // assign streambuf to cout
+  
+  cout << text;
+  
+  cout.rdbuf(backup);        // restore cout's original streambuf
+
+  out.close();
+}
+  
   
   
 

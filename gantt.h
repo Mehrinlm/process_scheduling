@@ -72,13 +72,10 @@ void GanttChart::print() {
   cout << "\n----------------------------\nGantt Chart\n----------------------------\n";
   for (int i = 0; i < (*gantt_items).size(); i++) {
     ostringstream convert;
-    convert << "P_ID: ";
     convert << (*gantt_items)[i]->p_id;
     while (convert.str().size() < 15) convert << " ";
-    convert << "Start: ";
     convert << (*gantt_items)[i]->start;
     while (convert.str().size() < 30) convert << " ";
-    convert << "End: ";
     convert << (*gantt_items)[i]->end;
     
     if ((*gantt_items)[i]->metDeadline == false){

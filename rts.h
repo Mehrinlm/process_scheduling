@@ -76,12 +76,20 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
   }
   free_queues(arrivalQueue, priorityQueue);
   delete(gantt_chart);
-  if (numOfProcess != 0){
+  if (numOfProcess != 0 && !TEST){
     printf("Average Turnaround: %.2f\n", (turnaround/double(numOfProcess)));
     printf("Average Wait: %.2f\n", (waitTime/double(numOfProcess)));
     printf("# of processes ran: %d\n", numOfProcess);
   }
 
-  
+  if (TEST) {
+    ostringstream os;
+    if (numOfProcess != 0) {
+      os << softMode << "\t" << numOfProcess << "\t" << ((waitTime/double(numOfProcess))) << "\t" << (turnaround/double(numOfProcess)) << "\n";
+    } else if (TEST) {
+      os << softMode << "\t" << numOfProcess << "\t" << 0 << "\t" << 0 << "\n";
+    }
+    writeToFile("tests.txt", (os.str()).c_str());
+  }
 }
 

@@ -1,5 +1,6 @@
 using namespace std;
 #define DEBUG 0
+#define TEST 0
 
 #include <iostream>
 #include <string>
@@ -74,7 +75,10 @@ int main (int argc, char * arv[]) {
   int scheduler = getUserChoice("Choose a scheduler:", schedulers);
 
   if (scheduler == 1) {
-    executeMFQS(arrival_queue);
+    int num_queues = getUserInt("Enter the number of queues (1-5)", 1, 5);
+    int time_quantum = getUserInt("Enter the top queue's time quantum", 1, INT_MAX);
+    int aging_time = getUserInt("Enter the aging time", 1, INT_MAX);
+    executeMFQS(arrival_queue, num_queues, time_quantum, aging_time);
   } else if (scheduler == 2) {
     vector<string> rts;
     rts.push_back("Hard Mode");
@@ -82,7 +86,8 @@ int main (int argc, char * arv[]) {
     int rtsMode = getUserChoice("RTS Mode:", rts);
     executeRTS(arrival_queue, rtsMode == 2);
   } else if (scheduler == 3) {
-    executeHybrid(arrival_queue);
+    int time_quantum = getUserInt("Enter the scheduler time quantum", 1, INT_MAX);
+    executeHybrid(arrival_queue, time_quantum);
   }
 
   return 0;

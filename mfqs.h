@@ -225,7 +225,7 @@ int Mfqs::currentQueueRR() {
  | --------------------------------------------------|
  |                                                   |
  ****************************************************/
-int executeMFQS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arrival_queue) {
+int executeMFQS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arrival_queue, int num_queues, int time_quantum, int aging_time) {
 
   // set system_clock
   int system_clock = 0;
@@ -234,19 +234,16 @@ int executeMFQS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* ar
   int current_queue = 0;
 
   // printArrival(*arrival_queue);
-
-  cout << "\n----------------------------\nMulti-level Feedback Queue\n----------------------------\n";
-
-  int num_queues = getUserInt("Enter the number of queues (1-5)", 1, 5);
-  int time_quantum = getUserInt("Enter the top queue's time quantum", 1, INT_MAX);
-  int aging_time = getUserInt("Enter the aging time", 1, INT_MAX);
+  if (!TEST) {
+    cout << "\n----------------------------\nMulti-level Feedback Queue\n----------------------------\n";
+  }
 
   Mfqs *mfqs = new Mfqs (num_queues, time_quantum, aging_time, arrival_queue);
   
   // set up var to track current process cpu time (compare to time quantum)
   int cpu_time;
 
-  if (DEBUG) cout << "\n----------------------------\nSimulation Start:\n----------------------------\n";
+  if (DEBUG && !TEST) cout << "\n----------------------------\nSimulation Start:\n----------------------------\n";
 
   while ((*arrival_queue).empty() == false || (*mfqs).allQueuesEmpty() == false) {
     cpu_time = 0;
@@ -306,20 +303,26 @@ int executeMFQS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* ar
 
 
   // print gantt chart
-  (*((*mfqs).getGanttChart())).print();
+  if (!TEST) {
+    (*((*mfqs).getGanttChart())).print();
+  }
   writeToFile("mfqs_output.txt", ((*mfqs).getGanttChart())); 
   // print statistics
-  cout << "\n----------------------------\nSimulation Statistics:\n----------------------------\n";
- // cout.precision(2);
-  cout << "Total Processes Scheduled: " << (*mfqs).getProcessesScheduled() << endl;
-  cout << "Average Waiting Time: " << (*mfqs).getAverageWaitingTime() << endl;
-  cout << "Average Turnaround Time: " << (*mfqs).getAverageTurnaroundTime() << endl;
+  if (!TEST) {
+    cout << "\n----------------------------\nSimulation Statistics:\n----------------------------\n";
+    cout << "Total Processes Scheduled: " << (*mfqs).getProcessesScheduled() << endl;
+    cout << "Average Waiting Time: " << (*mfqs).getAverageWaitingTime() << endl;
+    cout << "Average Turnaround Time: " << (*mfqs).getAverageTurnaroundTime() << endl;
+  }
   
-  // printf("Total Processes Scheduled: %d\n",(*mfqs).getProcessesScheduled());
-  // printf("Average Waiting Time: %.2f\n", (*mfqs).getAverageWaitingTime());
-  // printf("Average Turnaround Time: %.2f\n", (*mfqs).getAverageTurnaroundTime());
+  if (TEST) {
+    ostringstream os;
+    os << num_queues << "\t" << time_quantum << "\t" << aging_time << "\t" << (*mfqs).getProcessesScheduled() << "\t" << (*mfqs).getAverageWaitingTime() << "\t" << (*mfqs).getAverageTurnaroundTime() << "\t\n";
+    writeToFile("tests.txt", (os.str()).c_str());
+  }
+      
 
-  if (DEBUG) cout << "\n----------------------------\nSimulation End\n----------------------------\n";
+  if (DEBUG && !TEST) cout << "\n----------------------------\nSimulation End\n----------------------------\n";
 
   delete(arrival_queue);
   delete(mfqs);

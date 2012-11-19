@@ -275,14 +275,14 @@ void HybridScheduler::checkForIoComplete(int system_clock) {
  | --------------------------------------------------|
  |                                                   |
  ****************************************************/
-int executeHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arrival_queue) {
+int executeHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arrival_queue, int time_quantum) {
 
   // set system_clock
   int system_clock = 0;
 
-  cout << "\n----------------------------\nHybrid Scheduler\n----------------------------\n";
-
-  int time_quantum = getUserInt("Enter the scheduler time quantum", 1, INT_MAX);
+  if (!TEST) {
+    cout << "\n----------------------------\nHybrid Scheduler\n----------------------------\n";
+  }
 
   // set up var to track current process cpu time (compare to time quantum)
   int cpu_time;
@@ -323,7 +323,7 @@ int executeHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* 
         process_set = 1;
       }
 
-      if (DEBUG){
+      if (DEBUG && !TEST){
         cout << "\n----------------------------\nArrival Queue:\n----------------------------\n";
         printArrival(*arrival_queue);
         cout << "\n----------------------------\nDynamic Pri Queue:\n----------------------------\n";
@@ -362,17 +362,28 @@ int executeHybrid(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* 
   }
 
   // print gantt chart
-  (*((*hybrid).getGanttChart())).print();
+  if (!TEST) {
+    (*((*hybrid).getGanttChart())).print();
+  }
   writeToFile("mfqs_output.txt", ((*hybrid).getGanttChart())); 
 
   // print statistics
-  cout << "\n----------------------------\nSimulation Statistics:\n----------------------------\n";
-  printf("Total Processes Scheduled: %d\n", (*hybrid).getProcessesScheduled());
-  printf("Average Waiting Time: %.2f\n", (*hybrid).getAverageWaitingTime());
-  printf("Average Turnaround Time: %.2f\n", (*hybrid).getAverageTurnaroundTime());
+  // print statistics
+  if (!TEST) {
+    cout << "\n----------------------------\nSimulation Statistics:\n----------------------------\n";
+    printf("Total Processes Scheduled: %d\n", (*hybrid).getProcessesScheduled());
+    printf("Average Waiting Time: %.2f\n", (*hybrid).getAverageWaitingTime());
+    printf("Average Turnaround Time: %.2f\n", (*hybrid).getAverageTurnaroundTime());
+  }
   
   if (DEBUG) cout << "\n----------------------------\nSimulation End\n----------------------------\n";
 
+  if (TEST) {
+    ostringstream os;
+    os << time_quantum << "\t" << (*hybrid).getProcessesScheduled() << "\t" << (*hybrid).getAverageWaitingTime() << "\t" << (*hybrid).getAverageTurnaroundTime() << "\t\n";
+    writeToFile("tests.txt", (os.str()).c_str());
+  }
+      
   delete(arrival_queue);
   delete(hybrid);
 }
