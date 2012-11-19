@@ -21,6 +21,7 @@ class GanttChart {
     void end(int);
     void print();
     void deadLineMissed();
+    void printParseable();
 };
 
 GanttChart::GanttChart(){
@@ -60,15 +61,6 @@ void GanttChart::end(int system_clock) {
 
 void GanttChart::print() {
 
-  //Get the largestEnd value
-  int totalEnd = 0;
-  for (int i = 0; i < (*gantt_items).size(); i++) {
-    if (totalEnd < (*gantt_items)[i]->end){
-       totalEnd = (*gantt_items)[i]->end;
-    }
-  }
-  
-  
   cout << "\n----------------------------\nGantt Chart\n----------------------------\n";
   for (int i = 0; i < (*gantt_items).size(); i++) {
     ostringstream convert;
@@ -81,6 +73,26 @@ void GanttChart::print() {
     if ((*gantt_items)[i]->metDeadline == false){
       while (convert.str().size() < 40) convert << " ";
       convert << "DEADLINE FAILED";
+    }
+    cout << convert.str() << endl;
+  }
+}
+
+void GanttChart::printParseable() {
+
+  cout << "\n----------------------------\nGantt Chart\n----------------------------\n";
+  for (int i = 0; i < (*gantt_items).size(); i++) {
+    ostringstream convert;
+    convert << (*gantt_items)[i]->unique_id;
+    convert << " ";
+    convert << (*gantt_items)[i]->p_id;
+    convert << " ";
+    convert << (*gantt_items)[i]->start;
+    convert << " ";
+    convert << (*gantt_items)[i]->end;
+    
+    if ((*gantt_items)[i]->metDeadline == false){
+      convert << "*";
     }
     cout << convert.str() << endl;
   }

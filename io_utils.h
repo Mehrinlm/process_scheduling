@@ -112,7 +112,7 @@ int writeToFile(const char* fileName, GanttChart* chart){
   psbuf = out.rdbuf();   // get file's streambuf
   cout.rdbuf(psbuf);         // assign streambuf to cout
   
-  (*chart).print();
+  (*chart).printParseable();
   
   cout.rdbuf(backup);        // restore cout's original streambuf
 
