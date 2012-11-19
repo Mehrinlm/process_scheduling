@@ -34,22 +34,20 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
     //Schedule!!!
     while ((*priorityQueue).empty() == false && !hardModeFailed){
       p = (*priorityQueue).top();                  //Get top of queue
-      (*gantt_chart).start((*p).getP_ID(), system_clock);    //Set up gantt chart
+      (*gantt_chart).start((*p).getP_ID(), system_clock, (*p).getUniqueID());    //Set up gantt chart
       int burst = (*p).getBurstRemaining();                 //Check remainint burst
       (*p).setBurstRemaining(--burst);                      //reduce burst by 1
       if (burst < 0 || system_clock > (*p).getDeadline()){
         //If that process is done, remove it from queue and free
 
-        
         //add up stats info
         turnaround += (system_clock - (*p).getArrival());
         numOfProcess++;
-        waitTime += ((system_clock - (*p).getArrival()) - ((*p).getBurst() - (*p).getBurstRemaining()));
+        waitTime += ((system_clock - (*p).getArrival()) - ((*p).getBurst() - (*p).getBurstRemaining() -1));
         
         if (system_clock > (*p).getDeadline()) {
           if (softMode){
             (*gantt_chart).deadLineMissed();
-            system_clock--;
           } else {
             hardModeFailed = true;
           } 
@@ -59,7 +57,7 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
           (*priorityQueue).pop();
           free(p);
         }
-
+system_clock--;
       }
      
       //update clock and check for new arrivals
@@ -78,8 +76,8 @@ int executeRTS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arr
   free_queues(arrivalQueue, priorityQueue);
   delete(gantt_chart);
   if (numOfProcess != 0){
-    printf("Average Turnaround: %d\n", (turnaround/numOfProcess));
-    printf("Average Wait: %d\n", (waitTime/numOfProcess));
+    printf("Average Turnaround: %.2f\n", (turnaround/double(numOfProcess)));
+    printf("Average Wait: %.2f\n", (waitTime/double(numOfProcess)));
     printf("# of processes ran: %d\n", numOfProcess);
   }
 

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <limits>
 #include <climits>
+#include "Process.h"
 
 string getUserString(string message) {
 
@@ -39,6 +40,37 @@ int getUserChoice(string message, vector<string> options) {
   cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
   return choice;
+}
+
+//Adds a process by promting user for inputs
+Process* addProcess(){
+  string input = "";
+  
+  //P_ID
+  input += getUserString("Enter P_ID: ")+ "\t";
+  
+  //Burst
+  input += getUserString("Enter Burst: ")+ "\t";
+  
+  //Arrival
+  input += getUserString("Enter Arrival: ")+ "\t";
+  
+  //Priority
+  input += getUserString("Enter Priority: ")+ "\t";
+  
+  //Deadline
+  input += getUserString("Enter Deadline: ")+ "\t";
+  
+  //io
+  input += getUserString("Enter I/O: ");
+  
+  Process* process = new Process(); 
+  if ((*process).create(input)){
+    return process;
+  } else {
+    delete(process);
+    return NULL;
+  }
 }
 
 int getUserInt(string message, int min, int max) {

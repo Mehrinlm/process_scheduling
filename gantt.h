@@ -5,6 +5,7 @@
 
 struct gantt_item {
   int p_id;
+  int unique_id;
   int start;
   int end;
   bool metDeadline;
@@ -16,7 +17,7 @@ class GanttChart {
   public:
     GanttChart();
     ~GanttChart();
-    void start(int, int);
+    void start(int, int, int);
     void end(int);
     void print();
     void deadLineMissed();
@@ -36,11 +37,12 @@ GanttChart::~GanttChart(){
   delete(gantt_items);
 }
 
-void GanttChart::start(int p_id, int system_clock) {
+void GanttChart::start(int p_id, int system_clock, int unique_ID) {
   // only add new gantt_item if it has a different p_id
-  if ((*gantt_items).empty() || ((*gantt_items)[(*gantt_items).size() - 1]->p_id != p_id || (*gantt_items)[(*gantt_items).size() - 1]->end != system_clock)) {
+  if ((*gantt_items).empty() || ((*gantt_items)[(*gantt_items).size() - 1]->unique_id != unique_ID || (*gantt_items)[(*gantt_items).size() - 1]->end != system_clock)) {
     struct gantt_item *next_gantt = (struct gantt_item *) malloc(sizeof(struct gantt_item));
     next_gantt->p_id = p_id;
+    next_gantt->unique_id = unique_ID;
     next_gantt->metDeadline = true;
     next_gantt->start = system_clock;
     next_gantt->end = system_clock;

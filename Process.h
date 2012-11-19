@@ -3,8 +3,13 @@
 #ifndef PROCESS
 #define PROCESS
 
+//Used to keep track of which process is which (like primary key in DB)
+// since P_IDs may not be unique?
+int unique_id_val = 0;
+
 using namespace std;
 class Process {
+   int unique_id;
    int P_ID;
    int burst;
    int arrival;
@@ -37,7 +42,12 @@ class Process {
    void setIoFinish(int);
    int getLastCpuTime();
    void setLastCpuTime(int);
+   int getUniqueID();
 };
+
+int Process::getUniqueID(){
+  return unique_id;
+}
 
 int Process::getBurstRemaining(){
   return burstRemaining;
@@ -60,7 +70,7 @@ void Process::setQueueArrival(int system_clock){
 }
 
 int Process::getBurst(){
-  return arrival;
+  return burst;
 }
 
 int Process::getDeadline(){
@@ -205,6 +215,7 @@ int Process::create(string info){
   istringstream convert(num);
   convert >> varaibles[index];
 
+  unique_id = unique_id_val++;
   P_ID = boxInt(varaibles[0], 0, INT_MAX);
   burst = boxInt(varaibles[1], 0, INT_MAX);
   burstRemaining = boxInt(varaibles[1], 0, INT_MAX);
@@ -280,4 +291,5 @@ string Process::toStringCondensed(){
 
   return convert.str();
 }
+
 #endif

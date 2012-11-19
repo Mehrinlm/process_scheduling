@@ -11,12 +11,7 @@ using namespace std;
 #include "rts.h"
 
 
-// -------------- START UNIMPLEMENTED FUNC STUBS -------------- //
 
-// process funcs
-void addProcess(){cout << "Add Process";};
-
-// -------------- END UNIMPLEMENTED FUNC STUBS -------------- //
 
 
 
@@ -40,7 +35,10 @@ int main (int argc, char * arv[]) {
 
     switch (process_action) {
       case 1: { // add process by hand
-        addProcess();
+        Process* p = addProcess();
+        if (p != NULL){
+          (*arrival_queue).push(p);
+        }
         break;
       }
 

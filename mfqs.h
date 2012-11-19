@@ -268,7 +268,7 @@ int executeMFQS(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* ar
       if (!process_set) {
         process = (*mfqs).getNextProcess();
         if (process != 0) {
-          (*((*mfqs).getGanttChart())).start((*process).getP_ID(), system_clock);
+          (*((*mfqs).getGanttChart())).start((*process).getP_ID(), system_clock, (*process).getUniqueID());
         }
         process_set = 1;
       }
