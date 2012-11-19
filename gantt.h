@@ -7,6 +7,7 @@ struct gantt_item {
   int p_id;
   int start;
   int end;
+  bool metDeadline;
 };
 
 class GanttChart {
@@ -18,6 +19,7 @@ class GanttChart {
     void start(int, int);
     void end(int);
     void print();
+    void deadLineMissed();
 };
 
 GanttChart::GanttChart(){
@@ -39,10 +41,15 @@ void GanttChart::start(int p_id, int system_clock) {
   if ((*gantt_items).empty() || ((*gantt_items)[(*gantt_items).size() - 1]->p_id != p_id || (*gantt_items)[(*gantt_items).size() - 1]->end != system_clock)) {
     struct gantt_item *next_gantt = (struct gantt_item *) malloc(sizeof(struct gantt_item));
     next_gantt->p_id = p_id;
+    next_gantt->metDeadline = true;
     next_gantt->start = system_clock;
     next_gantt->end = system_clock;
     (*gantt_items).push_back(next_gantt);
   }
+}
+
+void GanttChart::deadLineMissed(){
+  ((*gantt_items)[(*gantt_items).size() - 1])->metDeadline = false;
 }
 
 void GanttChart::end(int system_clock) {
@@ -50,9 +57,33 @@ void GanttChart::end(int system_clock) {
 }
 
 void GanttChart::print() {
+
+  //Get the largestEnd value
+  int totalEnd = 0;
+  for (int i = 0; i < (*gantt_items).size(); i++) {
+    if (totalEnd < (*gantt_items)[i]->end){
+       totalEnd = (*gantt_items)[i]->end;
+    }
+  }
+  
+  
   cout << "\n----------------------------\nGantt Chart\n----------------------------\n";
   for (int i = 0; i < (*gantt_items).size(); i++) {
-    printf("P_ID: %d\tStart: %d\tEnd:%d\n", (*gantt_items)[i]->p_id, (*gantt_items)[i]->start, (*gantt_items)[i]->end);
+    ostringstream convert;
+    convert << "P_ID: ";
+    convert << (*gantt_items)[i]->p_id;
+    while (convert.str().size() < 15) convert << " ";
+    convert << "Start: ";
+    convert << (*gantt_items)[i]->start;
+    while (convert.str().size() < 30) convert << " ";
+    convert << "End: ";
+    convert << (*gantt_items)[i]->end;
+    
+    if ((*gantt_items)[i]->metDeadline == false){
+      while (convert.str().size() < 40) convert << " ";
+      convert << "DEADLINE FAILED";
+    }
+    cout << convert.str() << endl;
   }
 }
 

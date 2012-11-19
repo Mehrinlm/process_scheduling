@@ -15,8 +15,9 @@ void readProcessesFromFile(const char* fileName, priority_queue<Process*, vector
     while (in.good()){
       getline(in, line);
       Process* process = new Process();     //Create Process
-      (*process).create(line);              //calls this method to parse out input tring
-      (*queue).push(process);               //Adds process to priority_que
+      if ((*process).create(line)){             //calls this method to parse out input tring
+        (*queue).push(process);               //Adds process to priority_que
+      }
     }
     in.close();
   }
@@ -70,6 +71,26 @@ void printIoFinish(std::priority_queue<Process*, vector<Process*>, io_finish_cmp
     queue.pop();
   }
 }
+
+// Frees all processesin queues
+void free_queues(std::priority_queue<Process*, vector<Process*>, arrive_cmp >* arrivalQueue,
+                  std::priority_queue<Process*, vector<Process*>, priority_cmp >* priorityQueue){
+    while ((*arrivalQueue).size() > 0){
+      Process *p = (*arrivalQueue).top();
+      (*arrivalQueue).pop();
+      free(p);
+    }    
+
+    while ((*priorityQueue).size() > 0){
+      Process *p = (*priorityQueue).top();
+      (*priorityQueue).pop();
+      free(p);
+    }   
+    
+    free(arrivalQueue);
+    free(priorityQueue);
+}
+
 
 /*****************************************************
  | Check For Arriving Processes                      |
