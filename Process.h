@@ -170,6 +170,16 @@ struct queue_arrive_cmp
         }
 };
 
+int boxInt(int val, int min, int max) {
+  if (val < min) {
+    return min;
+  } else if (val > max) {
+    return max;
+  } else {
+    return val;
+  }
+}
+
 int Process::create(string info){
   int varaibles[6];
   int index = 0;
@@ -187,14 +197,16 @@ int Process::create(string info){
   istringstream convert(num);
   convert >> varaibles[index];
 
-  P_ID = varaibles[0];
-  burst = varaibles[1];
-  arrival = varaibles[2];
-  priority = varaibles[3];
-  dynamic_priority = varaibles[3];
-  deadline = varaibles[4];
-  io = varaibles[5];
-  burstRemaining = burst;
+  P_ID = boxInt(varaibles[0], 0, INT_MAX);
+  burst = boxInt(varaibles[1], 0, INT_MAX);
+  burstRemaining = boxInt(varaibles[1], 0, INT_MAX);
+  arrival = boxInt(varaibles[2], 0, INT_MAX);
+  priority = boxInt(varaibles[3], 0, 99);
+  dynamic_priority = boxInt(varaibles[3], 0, 99);
+  deadline = boxInt(varaibles[4], 0, INT_MAX);
+  io = boxInt(varaibles[5], 0, INT_MAX);
+  io_finish = 0;
+  last_cpu_time = 0;
 
   return 1;
 }

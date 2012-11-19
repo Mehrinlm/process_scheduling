@@ -14,6 +14,7 @@ class GanttChart {
    
   public:
     GanttChart();
+    ~GanttChart();
     void start(int, int);
     void end(int);
     void print();
@@ -21,6 +22,16 @@ class GanttChart {
 
 GanttChart::GanttChart(){
   this->gantt_items = new vector<gantt_item*>;
+}
+
+GanttChart::~GanttChart(){
+  for(vector<gantt_item*>::iterator iter = (*gantt_items).begin(); iter < (*gantt_items).end(); iter++) {
+    struct gantt_item *next_gantt = (*iter);
+    iter = (*gantt_items).erase(iter);
+    iter--;
+    free(next_gantt);
+  }
+  delete(gantt_items);
 }
 
 void GanttChart::start(int p_id, int system_clock) {
