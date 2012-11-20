@@ -92,6 +92,7 @@ void GanttChart::printParseable() {
     convert << (*gantt_items)[i]->end;
     
     if ((*gantt_items)[i]->metDeadline == false){
+      convert << " ";
       convert << "*";
     }
     cout << convert.str() << endl;
