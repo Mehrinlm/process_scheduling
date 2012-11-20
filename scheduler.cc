@@ -75,7 +75,7 @@ int main (int argc, char * arv[]) {
   int scheduler = getUserChoice("Choose a scheduler:", schedulers);
 
   if (scheduler == 1) {
-    int num_queues = getUserInt("Enter the number of queues (1-5)", 1, 5);
+    int num_queues = getUserInt("Enter the number of queues (2-5)", 2, 5);
     int time_quantum = getUserInt("Enter the top queue's time quantum", 1, INT_MAX);
     int aging_time = getUserInt("Enter the aging time", 1, INT_MAX);
     executeMFQS(arrival_queue, num_queues, time_quantum, aging_time);

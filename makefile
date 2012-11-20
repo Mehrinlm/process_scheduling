@@ -5,4 +5,4 @@ test: test_scheduler.cc
 	g++ test_scheduler.cc -o test_scheduler
 
 clean:
-	rm scheduler
+	rm scheduler test_scheduler
